@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Property Listing Checklist</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(180deg, #F4F8F6 0%, #FAF9F5 100%);
+    color: #1E2A28;
+    min-height: 100vh;
+    padding: 32px 16px;
+  }
+  .wrap {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 10px 40px rgba(30, 42, 40, 0.10);
+    overflow: hidden;
+  }
+  .header {
+    background: linear-gradient(135deg, #1C2B3A 0%, #101826 100%);
+    color: #fff;
+    padding: 30px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 180px; height: 180px;
+    background: rgba(232,205,169,0.15);
+    border-radius: 50%;
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .header h1 { font-size: 25px; font-weight: 700; margin-bottom: 6px; position: relative; }
+  .header p { font-size: 14px; opacity: 0.85; line-height: 1.5; position: relative; }
+
+  .body { padding: 26px 32px 32px; }
+
+  .overall-progress {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #F5F6F8;
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 24px;
+  }
+  .ring-wrap { position: relative; width: 56px; height: 56px; flex-shrink: 0; }
+  .ring-wrap svg { transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: #E4E1D8; stroke-width: 6; }
+  .ring-fill { fill: none; stroke: #B08D57; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 0.3s; }
+  .ring-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #1C2B3A; }
+  .overall-info { flex: 1; }
+  .overall-info .ov-title { font-size: 14px; font-weight: 700; color: #1E2A28; margin-bottom: 2px; }
+  .overall-info .ov-sub { font-size: 12.5px; color: #566361; }
+  .reset-btn {
+    background: none; border: 1px solid #E4E1D8; border-radius: 8px;
+    font-size: 11.5px; font-weight: 600; color: #566361;
+    padding: 6px 10px; cursor: pointer;
+  }
+  .reset-btn:hover { background: #F0EFE8; }
+
+  .celebrate {
+    display: none;
+    background: #F1ECE0;
+    border: 1.5px solid #D9C39A;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+    color: #1C2B3A;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .celebrate.show { display: block; }
+
+  .category {
+    border: 1px solid #EFEDE5;
+    border-radius: 14px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .cat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: #FAF9F5;
+    cursor: pointer;
+    user-select: none;
+  }
+  .cat-header-left { display: flex; align-items: center; gap: 10px; }
+  .cat-icon {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: #B08D57;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+  .cat-title { font-size: 14px; font-weight: 700; color: #1E2A28; }
+  .cat-count { font-size: 12px; color: #9A968A; font-weight: 600; }
+  .chevron { font-size: 12px; color: #9A968A; transition: transform 0.2s; }
+  .category.collapsed .chevron { transform: rotate(-90deg); }
+  .category.collapsed .cat-body { max-height: 0; padding-top: 0; padding-bottom: 0; }
+  .cat-body { padding: 6px 16px 14px; max-height: 600px; overflow: hidden; transition: max-height 0.25s ease; }
+
+  .item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid #F5F3EC;
+    cursor: pointer;
+  }
+  .item:last-child { border-bottom: none; }
+  .item input { margin-top: 3px; width: 18px; height: 18px; accent-color: #B08D57; cursor: pointer; flex-shrink: 0; }
+  .item label { font-size: 13.5px; color: #3A4644; cursor: pointer; line-height: 1.4; }
+  .item.checked label { color: #B4B0A4; text-decoration: line-through; }
+
+  .cta {
+    margin-top: 22px;
+    background: #F5EDE0;
+    border: 1.5px solid #B08D57;
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .cta .cta-label { font-size: 11px; font-weight: 700; color: #96754A; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .cta p { font-size: 13.5px; color: #3A3226; line-height: 1.55; }
+  .footer { text-align: center; font-size: 11.5px; color: #9A968A; margin-top: 20px; }
+
+  .compare {
+    margin-top: 22px;
+    border: 1.5px solid #E4E1D8;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .compare-head {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    background: #F5F6F8;
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #566361;
+  }
+  .compare-head .col-paid { color: #1C2B3A; }
+  .compare-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    padding: 11px 14px;
+    font-size: 13px;
+    border-top: 1px solid #EFEDE5;
+    align-items: center;
+  }
+  .compare-row .name { color: #1E2A28; }
+  .compare-row .yes { color: #B08D57; font-weight: 700; text-align: center; }
+  .compare-row .no { color: #C7C3B8; text-align: center; }
+
+  .locked {
+    margin-top: 22px;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1.5px solid #E4E1D8;
+  }
+  .locked-preview {
+    filter: blur(3px);
+    opacity: 0.55;
+    padding: 16px;
+    font-size: 12.5px;
+    background: #FAF9F5;
+    pointer-events: none;
+    user-select: none;
+  }
+  .locked-preview .lp-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #E4E1D8; }
+  .locked-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: rgba(255,255,255,0.35);
+  }
+  .lock-icon {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: #1C2B3A;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  .locked-overlay .lo-title { font-size: 13px; font-weight: 700; color: #1E2A28; }
+  .locked-overlay .lo-sub { font-size: 11.5px; color: #566361; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="header">
+    <span class="badge">Free checklist</span>
+    <h1>Property Listing Checklist</h1>
+    <p>Never miss a step when prepping a new listing for your agent.</p>
+  </div>
+
+  <div class="body">
+    <div class="overall-progress">
+      <div class="ring-wrap">
+        <svg width="56" height="56" viewBox="0 0 56 56">
+          <circle class="ring-bg" cx="28" cy="28" r="24"></circle>
+          <circle class="ring-fill" id="ringFill" cx="28" cy="28" r="24" stroke-dasharray="150.8" stroke-dashoffset="150.8"></circle>
+        </svg>
+        <div class="ring-text" id="ringText">0%</div>
+      </div>
+      <div class="overall-info">
+        <div class="ov-title" id="progressCount">0 of 16 complete</div>
+        <div class="ov-sub">Auto-saved on this device</div>
+      </div>
+      <button class="reset-btn" id="resetBtn">Reset</button>
+    </div>
+
+    <div class="celebrate" id="celebrate">🎉 Listing fully prepped! You're ready to go live.</div>
+
+    <div class="category" data-cat="before">
+      <div class="cat-header">
+        <div class="cat-header-left">
+          <div class="cat-icon">🏠</div>
+          <div class="cat-title">Before Listing Goes Live</div>
+        </div>
+        <div class="cat-header-left">
+          <span class="cat-count" data-count="before">0/5</span>
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+      <div class="cat-body">
+        <div class="item"><input type="checkbox" id="c1"><label for="c1">Confirm listing price with agent</label></div>
+        <div class="item"><input type="checkbox" id="c2"><label for="c2">Collect and organize property photos</label></div>
+        <div class="item"><input type="checkbox" id="c3"><label for="c3">Write and proofread listing description</label></div>
+        <div class="item"><input type="checkbox" id="c4"><label for="c4">Verify property details (beds, baths, sq ft)</label></div>
+        <div class="item"><input type="checkbox" id="c5"><label for="c5">Confirm showing instructions with owner</label></div>
+      </div>
+    </div>
+
+    <div class="category" data-cat="mls">
+      <div class="cat-header">
+        <div class="cat-header-left">
+          <div class="cat-icon">📋</div>
+          <div class="cat-title">MLS &amp; Syndication</div>
+        </div>
+        <div class="cat-header-left">
+          <span class="cat-count" data-count="mls">0/4</span>
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+      <div class="cat-body">
+        <div class="item"><input type="checkbox" id="c6"><label for="c6">Enter listing into MLS</label></div>
+        <div class="item"><input type="checkbox" id="c7"><label for="c7">Double-check syndication to Zillow, Realtor.com</label></div>
+        <div class="item"><input type="checkbox" id="c8"><label for="c8">Add virtual tour / video link if available</label></div>
+        <div class="item"><input type="checkbox" id="c9"><label for="c9">Set up open house schedule (if applicable)</label></div>
+      </div>
+    </div>
+
+    <div class="category" data-cat="marketing">
+      <div class="cat-header">
+        <div class="cat-header-left">
+          <div class="cat-icon">📣</div>
+          <div class="cat-title">Marketing</div>
+        </div>
+        <div class="cat-header-left">
+          <span class="cat-count" data-count="marketing">0/3</span>
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+      <div class="cat-body">
+        <div class="item"><input type="checkbox" id="c10"><label for="c10">Create social media post(s)</label></div>
+        <div class="item"><input type="checkbox" id="c11"><label for="c11">Send listing to agent's email list</label></div>
+        <div class="item"><input type="checkbox" id="c12"><label for="c12">Print/order yard sign and flyers</label></div>
+      </div>
+    </div>
+
+    <div class="category" data-cat="followup">
+      <div class="cat-header">
+        <div class="cat-header-left">
+          <div class="cat-icon">📊</div>
+          <div class="cat-title">Post-Launch Follow-up</div>
+        </div>
+        <div class="cat-header-left">
+          <span class="cat-count" data-count="followup">0/4</span>
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+      <div class="cat-body">
+        <div class="item"><input type="checkbox" id="c13"><label for="c13">Monitor and respond to inquiries</label></div>
+        <div class="item"><input type="checkbox" id="c14"><label for="c14">Track showing feedback</label></div>
+        <div class="item"><input type="checkbox" id="c15"><label for="c15">Send weekly activity report to agent</label></div>
+        <div class="item"><input type="checkbox" id="c16"><label for="c16">Update listing status as needed</label></div>
+      </div>
+    </div>
+
+    <div class="locked">
+      <div class="locked-preview">
+        <div class="lp-row"><span>New Buyer Lead</span><span>Follow-up in 2 days</span></div>
+        <div class="lp-row"><span>128 Maple St — Viewing</span><span>Tomorrow, 3:00 PM</span></div>
+        <div class="lp-row"><span>Weekly Report</span><span>Auto-generated</span></div>
+        <div class="lp-row"><span>AI Prompt: Listing Description</span><span>Ready to use</span></div>
+      </div>
+      <div class="locked-overlay">
+        <div class="lock-icon">&#128274;</div>
+        <div class="lo-title">Leads, Appointments &amp; AI Prompts</div>
+        <div class="lo-sub">Unlocked in Real Estate VA System</div>
+      </div>
+    </div>
+
+    <div class="compare">
+      <div class="compare-head">
+        <div>Feature</div>
+        <div style="text-align:center;">Free</div>
+        <div class="col-paid" style="text-align:center;">Paid</div>
+      </div>
+      <div class="compare-row"><span class="name">Listing prep checklist</span><span class="yes">&#10003;</span><span class="yes">&#10003;</span></div>
+      <div class="compare-row"><span class="name">Lead &amp; follow-up tracker</span><span class="no">&mdash;</span><span class="yes">&#10003;</span></div>
+      <div class="compare-row"><span class="name">Appointment scheduler</span><span class="no">&mdash;</span><span class="yes">&#10003;</span></div>
+      <div class="compare-row"><span class="name">Property &amp; task management</span><span class="no">&mdash;</span><span class="yes">&#10003;</span></div>
+      <div class="compare-row"><span class="name">12 message templates</span><span class="no">&mdash;</span><span class="yes">&#10003;</span></div>
+      <div class="compare-row"><span class="name">AI prompt library</span><span class="no">&mdash;</span><span class="yes">&#10003;</span></div>
+      <div class="compare-row"><span class="name">Weekly reports &amp; SOPs</span><span class="no">&mdash;</span><span class="yes">&#10003;</span></div>
+    </div>
+
+    <div class="cta">
+      <div class="cta-label">Want the full system?</div>
+      <p><b>Real Estate VA System</b> replaces this single checklist with a complete lead, appointment, and client-management dashboard — everything above, built and ready to use today.</p>
+    </div>
+  </div>
+</div>
+
+<div class="footer">Works offline · No signup required · Progress auto-saves on this device</div>
+
+<script>
+const STORAGE_KEY = 'reva_listing_checklist_v1';
+const categoryMap = {
+  before: ['c1','c2','c3','c4','c5'],
+  mls: ['c6','c7','c8','c9'],
+  marketing: ['c10','c11','c12'],
+  followup: ['c13','c14','c15','c16']
+};
+const allIds = Object.values(categoryMap).flat();
+const RADIUS = 24;
+const CIRC = 2 * Math.PI * RADIUS;
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+function saveState(state) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+}
+
+function render() {
+  const state = loadState();
+  allIds.forEach(id => {
+    const cb = document.getElementById(id);
+    cb.checked = !!state[id];
+    cb.closest('.item').classList.toggle('checked', cb.checked);
+  });
+
+  let totalChecked = 0;
+  Object.entries(categoryMap).forEach(([cat, ids]) => {
+    const checked = ids.filter(id => state[id]).length;
+    totalChecked += checked;
+    document.querySelector('[data-count="' + cat + '"]').textContent = checked + '/' + ids.length;
+  });
+
+  const pct = Math.round((totalChecked / allIds.length) * 100);
+  document.getElementById('progressCount').textContent = totalChecked + ' of ' + allIds.length + ' complete';
+  document.getElementById('ringText').textContent = pct + '%';
+  const offset = CIRC - (pct / 100) * CIRC;
+  document.getElementById('ringFill').style.strokeDasharray = CIRC;
+  document.getElementById('ringFill').style.strokeDashoffset = offset;
+
+  document.getElementById('celebrate').classList.toggle('show', totalChecked === allIds.length);
+}
+
+allIds.forEach(id => {
+  document.getElementById(id).addEventListener('change', (e) => {
+    const state = loadState();
+    state[id] = e.target.checked;
+    saveState(state);
+    render();
+  });
+});
+
+document.querySelectorAll('.cat-header').forEach(header => {
+  header.addEventListener('click', () => {
+    header.closest('.category').classList.toggle('collapsed');
+  });
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (confirm('Reset all checklist progress?')) {
+    localStorage.removeItem(STORAGE_KEY);
+    render();
+  }
+});
+
+render();
+</script>
+
+</body>
+</html>
